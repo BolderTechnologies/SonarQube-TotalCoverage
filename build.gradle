@@ -1,0 +1,79 @@
+/*
+ * Copyright (c) 2016 BolderTechnologies
+ */
+
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "org.sonarqube.gradle:gradle-sonarqube-plugin:1.1"
+    }
+}
+
+version = '0.0.1'
+group = 'com.boldertechnologies'
+
+apply plugin: 'java'
+apply plugin: 'jacoco'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'org.sonarqube'
+
+configurations {
+    itTest
+}
+
+allprojects {
+    repositories {
+        mavenCentral()
+    }
+}
+
+jacocoTestReport{
+    executionData = project.fileTree(dir: '.', include:'**/build/jacoco/*.exec')
+    classDirectories = project.fileTree(dir: '.', include:'**/build/classes/main/**/*', excludes: [])
+    sourceDirectories = project.fileTree(dir: '.', include:'**/src/main/java/**/*')
+}
+
+//jacoco {
+    //toolVersion = "0.7.5.201505241946"
+//}
+
+def allTestCoverageFile = "$buildDir/jacoco/allTestCoverage.exec"
+def allITCoverageFile = "$buildDir/jacoco/allITCoverage.exec"
+
+sonarqube {
+    properties {
+        property "sonar.projectKey", "com.boldertechnologies:SonarQube-TotalCoverage"
+        property "sonar.projectName", "SonarQube-TotalCoverage"
+        property "sonar.jacoco.reportPath", allTestCoverageFile
+        property "sonar.jacoco.itReportPath", allITCoverageFile
+    }
+}
+
+task jacocoMergeTest(type:JacocoMerge) {
+    destinationFile = file(allTestCoverageFile)
+    executionData = project.fileTree(dir: '.', include:'**/build/jacoco/test.exec')
+}
+
+task jacocoMergeIntegrationTest(type:JacocoMerge) {
+    destinationFile = file(allITCoverageFile)
+    // merge all the it coverage outputs from all projects into one
+    executionData = project.fileTree(dir: '.', includes: ['**/build/jacoco/itTest.exec'])
+}
+
+task jacocoMerge(dependsOn: ['jacocoMergeTest', 'jacocoMergeIntegrationTest']) {
+    // used to run the other merge tasks
+}
+
+subprojects {
+    sonarqube {
+        properties {
+            property "sonar.jacoco.reportPath", allTestCoverageFile
+            property "sonar.jacoco.itReportPath", allITCoverageFile
+        }
+    }
+}
