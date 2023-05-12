@@ -9,6 +9,6 @@ repositories {
 }
 
 dependencies {
-	compile project(':api')
-	testCompile 'junit:junit:4.12'
+	implementation project(':api')
+	implementation 'junit:junit:4.12'
 }

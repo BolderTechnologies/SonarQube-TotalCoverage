@@ -2,15 +2,8 @@
  * Copyright (c) 2016 BolderTechnologies
  */
 
-buildscript {
-    repositories {
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-    }
-    dependencies {
-        classpath "org.sonarqube.gradle:gradle-sonarqube-plugin:1.1"
-    }
+plugins {
+  id "org.sonarqube" version "4.0.0.2929"
 }
 
 version = '0.0.1'
@@ -20,7 +13,7 @@ apply plugin: 'java'
 apply plugin: 'jacoco'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
-apply plugin: 'org.sonarqube'
+apply plugin: "org.sonarqube"
 
 configurations {
     itTest
@@ -38,36 +31,47 @@ jacocoTestReport{
     sourceDirectories = project.fileTree(dir: '.', include:'**/src/main/java/**/*')
 }
 
-//jacoco {
-    //toolVersion = "0.7.5.201505241946"
-//}
+jacoco {
+    toolVersion = "0.7.5.201505241946"
+}
 
 def allTestCoverageFile = "$buildDir/jacoco/allTestCoverage.exec"
 def allITCoverageFile = "$buildDir/jacoco/allITCoverage.exec"
 
+// sonarqube {
+//     properties {
+//         property "sonar.projectKey", ""
+//         property "sonar.projectName", "SonarQube-TotalCoverage"
+//         property "sonar.jacoco.reportPath", allTestCoverageFile
+//         property "sonar.jacoco.itReportPath", allITCoverageFile
+//     }
+// }
+
+
 sonarqube {
-    properties {
-        property "sonar.projectKey", "com.boldertechnologies:SonarQube-TotalCoverage"
-        property "sonar.projectName", "SonarQube-TotalCoverage"
-        property "sonar.jacoco.reportPath", allTestCoverageFile
-        property "sonar.jacoco.itReportPath", allITCoverageFile
-    }
+  properties {
+    property("sonar.projectKey", "SonarQube-TotalCoverage")
+    property("sonar.organization", "myOrganization")
+    property("sonar.token", "sqp_dbcc522f48bff1f13da6931d34e655c74a72ceac")
+
+    property("sonar.host.url", "http://localhost:9000")
+  }
 }
 
-task jacocoMergeTest(type:JacocoMerge) {
-    destinationFile = file(allTestCoverageFile)
-    executionData = project.fileTree(dir: '.', include:'**/build/jacoco/test.exec')
-}
+// task jacocoMergeTest(type:JacocoMerge) {
+//     destinationFile = file(allTestCoverageFile)
+//     executionData = project.fileTree(dir: '.', include:'**/build/jacoco/test.exec')
+// }
 
-task jacocoMergeIntegrationTest(type:JacocoMerge) {
-    destinationFile = file(allITCoverageFile)
-    // merge all the it coverage outputs from all projects into one
-    executionData = project.fileTree(dir: '.', includes: ['**/build/jacoco/itTest.exec'])
-}
+// task jacocoMergeIntegrationTest(type:JacocoMerge) {
+//     destinationFile = file(allITCoverageFile)
+//     // merge all the it coverage outputs from all projects into one
+//     executionData = project.fileTree(dir: '.', includes: ['**/build/jacoco/itTest.exec'])
+// }
 
-task jacocoMerge(dependsOn: ['jacocoMergeTest', 'jacocoMergeIntegrationTest']) {
-    // used to run the other merge tasks
-}
+// task jacocoMerge(dependsOn: ['jacocoMergeTest', 'jacocoMergeIntegrationTest']) {
+//     // used to run the other merge tasks
+// }
 
 subprojects {
     sonarqube {
