@@ -11,6 +11,7 @@ package api;
 public class Position {
     final int x;
     final int y;
+    final int z;
 
     public Position(final int x, final int y) {
         this.x = x;
